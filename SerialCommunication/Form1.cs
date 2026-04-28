@@ -120,5 +120,21 @@ namespace SerialCommunication
                 labelStatus.Text = "Fout: " + ex.Message;
             }
         }
+
+        private void checkBoxDigital2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                {
+                    string command = checkBoxDigital2.Checked ? "set d2 high" : "set d2 low";
+                    serialPortArduino.WriteLine(command);
+                }
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Fout bij verzenden: " + ex.Message;
+            }
+        }
     }
 }

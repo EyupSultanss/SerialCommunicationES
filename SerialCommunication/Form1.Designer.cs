@@ -542,6 +542,7 @@
             this.checkBoxDigital2.TabIndex = 0;
             this.checkBoxDigital2.Text = "Digital 2";
             this.checkBoxDigital2.UseVisualStyleBackColor = true;
+            this.checkBoxDigital2.Click += new System.EventHandler(this.checkBoxDigital2_Click);
             // 
             // tabPageOefening2
             // 
