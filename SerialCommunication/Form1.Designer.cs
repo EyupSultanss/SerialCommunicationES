@@ -601,6 +601,7 @@
             this.trackBarPWM10.Size = new System.Drawing.Size(247, 45);
             this.trackBarPWM10.TabIndex = 2;
             this.trackBarPWM10.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.trackBarPWM10.Scroll += new System.EventHandler(this.trackBarPWM10_Scroll);
             // 
             // label1
             // 
