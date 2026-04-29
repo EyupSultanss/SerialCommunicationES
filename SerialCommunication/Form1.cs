@@ -184,5 +184,37 @@ namespace SerialCommunication
                 labelStatus.Text = "Fout bij verzenden: " + ex.Message;
             }
         }
+
+        private void trackBarPWM10_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                {
+                    string command = "set pwm10 " + trackBarPWM10.Value;
+                    serialPortArduino.WriteLine(command);
+                }
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Fout bij verzenden: " + ex.Message;
+            }
+        }
+
+        private void trackBarPWM11_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                {
+                    string command = "set pwm11 " + trackBarPWM11.Value;
+                    serialPortArduino.WriteLine(command);
+                }
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Fout bij verzenden: " + ex.Message;
+            }
+        }
     }
 }
