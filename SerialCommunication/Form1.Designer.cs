@@ -522,6 +522,7 @@
             this.checkBoxDigital4.TabIndex = 2;
             this.checkBoxDigital4.Text = "Digital 4";
             this.checkBoxDigital4.UseVisualStyleBackColor = true;
+            this.checkBoxDigital4.Click += new System.EventHandler(this.checkBoxDigital4_Click);
             // 
             // checkBoxDigital3
             // 
@@ -532,6 +533,7 @@
             this.checkBoxDigital3.TabIndex = 1;
             this.checkBoxDigital3.Text = "Digital 3";
             this.checkBoxDigital3.UseVisualStyleBackColor = true;
+            this.checkBoxDigital3.Click += new System.EventHandler(this.checkBoxDigital3_Click);
             // 
             // checkBoxDigital2
             // 
