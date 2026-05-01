@@ -249,21 +249,28 @@ namespace SerialCommunication
 
                     // digital5
                     serialPortArduino.WriteLine("get d5");
-                    string resp = serialPortArduino.ReadLine().Trim();
-                    string val = resp.Contains(":") ? resp.Split(':')[1].Trim() : resp;
-                    radioButtonDigital5.Checked = (val == "1");
+                    string resp5 = serialPortArduino.ReadLine().Trim();
+                    string val5 = resp5.Contains(":") ? resp5.Split(':')[1].Trim() : resp5;
+                    radioButtonDigital5.Checked = (val5 == "1");
 
                     // digital6
                     serialPortArduino.WriteLine("get d6");
-                    resp = serialPortArduino.ReadLine().Trim();
-                    val = resp.Contains(":") ? resp.Split(':')[1].Trim() : resp;
-                    radioButtonDigital6.Checked = (val == "1");
+                    string resp6 = serialPortArduino.ReadLine().Trim();
+                    string val6 = resp6.Contains(":") ? resp6.Split(':')[1].Trim() : resp6;
+                    radioButtonDigital6.Checked = (val6 == "1");
 
                     // digital7
                     serialPortArduino.WriteLine("get d7");
-                    resp = serialPortArduino.ReadLine().Trim();
-                    val = resp.Contains(":") ? resp.Split(':')[1].Trim() : resp;
-                    radioButtonDigital7.Checked = (val == "1");
+                    string resp7 = serialPortArduino.ReadLine().Trim();
+                    string val7 = resp7.Contains(":") ? resp7.Split(':')[1].Trim() : resp7;
+                    radioButtonDigital7.Checked = (val7 == "1");
+
+                    // Show raw responses for debugging
+                    labelStatus.Text = string.Format("d5={0} d6={1} d3={2}", resp5, resp6, resp7);
+                }
+                else
+                {
+                    labelStatus.Text = "Niet verbonden";
                 }
             }
             catch (Exception ex)
