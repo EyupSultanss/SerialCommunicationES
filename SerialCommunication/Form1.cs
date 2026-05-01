@@ -15,6 +15,7 @@ namespace SerialCommunication
     public partial class Form1 : Form
     {
         private System.IO.Ports.SerialPort serialPortArduino;
+        private System.Windows.Forms.Timer timerOefening3;
 
         public Form1()
         {
@@ -23,6 +24,14 @@ namespace SerialCommunication
             serialPortArduino = new System.IO.Ports.SerialPort();
             serialPortArduino.ReadTimeout = 1000;
             serialPortArduino.WriteTimeout = 1000;
+
+            // Timer for Oefening 3
+            timerOefening3 = new System.Windows.Forms.Timer();
+            timerOefening3.Interval = 1000;
+            timerOefening3.Tick += timerOefening3_Tick;
+
+            // Handle tab selection changes to enable/disable the timer
+            this.tabControl.SelectedIndexChanged += tabControl_SelectedIndexChanged;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -214,6 +223,52 @@ namespace SerialCommunication
             catch (Exception ex)
             {
                 labelStatus.Text = "Fout bij verzenden: " + ex.Message;
+            }
+        }
+
+        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                timerOefening3.Enabled = (this.tabControl.SelectedTab == this.tabPageOefening3);
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Fout: " + ex.Message;
+            }
+        }
+
+        private void timerOefening3_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                {
+                    // Clear previous incoming data
+                    serialPortArduino.ReadExisting();
+
+                    // digital5
+                    serialPortArduino.WriteLine("get d5");
+                    string resp = serialPortArduino.ReadLine().Trim();
+                    string val = resp.Contains(":") ? resp.Split(':')[1].Trim() : resp;
+                    radioButtonDigital5.Checked = (val == "1");
+
+                    // digital6
+                    serialPortArduino.WriteLine("get d6");
+                    resp = serialPortArduino.ReadLine().Trim();
+                    val = resp.Contains(":") ? resp.Split(':')[1].Trim() : resp;
+                    radioButtonDigital6.Checked = (val == "1");
+
+                    // digital7
+                    serialPortArduino.WriteLine("get d7");
+                    resp = serialPortArduino.ReadLine().Trim();
+                    val = resp.Contains(":") ? resp.Split(':')[1].Trim() : resp;
+                    radioButtonDigital7.Checked = (val == "1");
+                }
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Fout timer: " + ex.Message;
             }
         }
     }
