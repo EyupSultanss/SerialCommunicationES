@@ -16,10 +16,12 @@ namespace SerialCommunication
     {
         private System.IO.Ports.SerialPort serialPortArduino;
         private System.Windows.Forms.Timer timerOefening3;
+        private System.Windows.Forms.Timer timerVerbinding;
 
         public Form1()
         {
             InitializeComponent();
+            radioButtonVerbonden.AutoCheck = false;
 
             serialPortArduino = new System.IO.Ports.SerialPort();
             serialPortArduino.ReadTimeout = 1000;
@@ -30,8 +32,70 @@ namespace SerialCommunication
             timerOefening3.Interval = 1000;
             timerOefening3.Tick += timerOefening3_Tick;
 
+            // Timer voor controleren USB verbinding
+            timerVerbinding = new System.Windows.Forms.Timer();
+            timerVerbinding.Interval = 500;
+            timerVerbinding.Tick += timerVerbinding_Tick;
+            timerVerbinding.Start();
+
             // Handle tab selection changes to enable/disable the timer
             this.tabControl.SelectedIndexChanged += tabControl_SelectedIndexChanged;
+        }
+
+        private void timerVerbinding_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino != null &&
+                    serialPortArduino.IsOpen)
+                {
+                    // Test of poort nog reageert
+                    serialPortArduino.WriteLine("");
+
+                    // Controleer of COM-poort nog bestaat
+                    string[] poorten = SerialPort.GetPortNames();
+
+                    if (!poorten.Contains(serialPortArduino.PortName))
+                    {
+                        VerbreekVerbinding();
+                    }
+                }
+            }
+            catch
+            {
+                VerbreekVerbinding();
+            }
+        }
+        private void VerbreekVerbinding()
+        {
+            try
+            {
+                timerOefening3.Stop();
+                timerOefening4.Stop();
+                timerOefening5.Stop();
+
+                if (serialPortArduino != null)
+                {
+                    if (serialPortArduino.IsOpen)
+                    {
+                        serialPortArduino.Close();
+                    }
+
+                    serialPortArduino.Dispose();
+                }
+            }
+            catch
+            {
+
+            }
+
+            radioButtonVerbonden.Checked = false;
+
+            buttonConnect.Text = "Connect";
+
+            labelStatus.Text = "Arduino losgekoppeld";
+
+            this.Refresh();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -113,6 +177,7 @@ namespace SerialCommunication
                     serialPortArduino.Open();
 
                     radioButtonVerbonden.Checked = true;
+                    radioButtonVerbonden.Refresh();
                     buttonConnect.Text = "Disconnect";
                     labelStatus.Text = "Verbonden";
                 }
@@ -236,6 +301,9 @@ namespace SerialCommunication
             {
                 labelStatus.Text = "Fout: " + ex.Message;
             }
+
+            timerOefening4.Enabled = tabControl.SelectedIndex == 4;
+            timerOefening5.Enabled = tabControl.SelectedIndex == 5;
         }
 
         private void timerOefening3_Tick(object sender, EventArgs e)
@@ -278,5 +346,127 @@ namespace SerialCommunication
                 labelStatus.Text = "Fout timer: " + ex.Message;
             }
         }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void labelAnalog0_Click(object sender, EventArgs e)
+        {
+       
+        }
+
+        private void timerOefening4_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino.IsOpen)
+                {
+                    serialPortArduino.ReadExisting();
+                    string commando = "get a0";
+                    serialPortArduino.WriteLine(commando);
+                    string antwoord = serialPortArduino.ReadLine();
+                    antwoord = antwoord.TrimEnd();
+                    antwoord = antwoord.Substring(4);
+
+                    int value = Int32.Parse(antwoord);
+                    labelAnalog0.Text = value.ToString();
+                }
+            }
+            catch (Exception exception)
+            {
+                labelStatus.Text = "Error: " + exception.Message;
+                serialPortArduino.Close();
+                radioButtonVerbonden.Checked = false;
+                buttonConnect.Text = "connect";
+            }
+        }
+
+        private void timerOefening5_Tick(object sender, EventArgs e)
+        {
+
+            try
+            {
+                if (serialPortArduino != null && serialPortArduino.IsOpen)
+                {
+                    serialPortArduino.ReadExisting();
+
+                    // =========================
+                    // GEWENSTE TEMPERATUUR (A0)
+                    // =========================
+
+                    serialPortArduino.WriteLine("get a0");
+
+                    string antwoordA0 = serialPortArduino.ReadLine();
+                    antwoordA0 = antwoordA0.TrimEnd();
+                    antwoordA0 = antwoordA0.Substring(4);
+
+                    int waardeA0 = Int32.Parse(antwoordA0);
+
+                    // Herschalen 0..1023 -> 5..45 °C
+                    double ricoPot = (45.0 - 5.0) / 1023.0;
+                    double gewensteTemp = (waardeA0 * ricoPot) + 5.0;
+
+                    labelGewensteTemp.Text =
+                        gewensteTemp.ToString("0.0") + " °C";
+
+
+                    // =========================
+                    // HUIDIGE TEMPERATUUR (A1)
+                    // =========================
+
+                    serialPortArduino.WriteLine("get a1");
+
+                    string antwoordA1 = serialPortArduino.ReadLine();
+                    antwoordA1 = antwoordA1.TrimEnd();
+                    antwoordA1 = antwoordA1.Substring(4);
+
+                    int waardeA1 = Int32.Parse(antwoordA1);
+
+                    // Herschalen 0..1023 -> 0..500 °C
+                    double ricoLM35 = 500.0 / 1023.0;
+                    double huidigeTemp = waardeA1 * ricoLM35;
+
+                    labelHuidigeTemp.Text =
+                        huidigeTemp.ToString("0.0") + " °C";
+
+
+                    // =========================
+                    // LED OP D2 AANSTUREN
+                    // =========================
+
+                    if (huidigeTemp < gewensteTemp)
+                    {
+                        serialPortArduino.WriteLine("set d2 high");
+                    }
+                    else
+                    {
+                        serialPortArduino.WriteLine("set d2 low");
+                    }
+                }
+                else
+                {
+                    labelStatus.Text = "Error: kabel niet aangelosten";
+
+                    serialPortArduino.Close();
+
+                    radioButtonVerbonden.Checked = false;
+
+                    buttonConnect.Text = "connect";
+                }
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Error: " + ex.Message;
+
+                serialPortArduino.Close();
+
+                radioButtonVerbonden.Checked = false;
+
+                buttonConnect.Text = "connect";
+            }
+        }
+        }
     }
-}
+    
